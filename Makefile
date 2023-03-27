@@ -15,13 +15,13 @@ CXXFLAGS= -Wall -c -O3 -fPIC -std=c++11 $(INC) -DFMT_HEADER_ONLY=1
 SRCS = $(REL_PATH)/src/bankstate.cc     $(REL_PATH)/src/channel_state.cc \
 	   $(REL_PATH)/src/command_queue.cc $(REL_PATH)/src/common.cc \
 	   $(REL_PATH)/src/configuration.cc $(REL_PATH)/src/controller.cc \
-	   $(REL_PATH)/src/hmc.cc \
-	   $(REL_PATH)/src/memory_system.cc $(REL_PATH)/src/refresh.cc \
+	   $(REL_PATH)/src/hmc.cc           $(REL_PATH)/src/dram_system.cc \
+	   $(REL_PATH)/src/refresh.cc \
 	   $(REL_PATH)/src/simple_stats.cc  $(REL_PATH)/src/timing.cc
 
 RUNT = bankstate.o channel_state.o command_queue.o common.o \
-		configuration.o controller.o hmc.o \
-		memory_system.o refresh.o simple_stats.o timing.o
+		configuration.o controller.o hmc.o dram_system.o\
+		refresh.o simple_stats.o timing.o
 
 
 OBJECTS = $(addsuffix .o, $(basename $(SRCS)))
@@ -29,19 +29,19 @@ EXE_OBJS := $(OBJECTS)
 
 
 
-all: _dram_system.so
+all: _memory_system.so
 	python moduletest.py
 
-_dram_system.so: dram_system_wrap.o
-	g++ -shared dram_system.o dram_system_wrap.o $(RUNT) -o _dram_system.so
+_memory_system.so: memory_system_wrap.o
+	g++ -shared memory_system.o memory_system_wrap.o $(RUNT) -o _memory_system.so
 
-dram_system_wrap.o: dram_system_wrap.cxx
-	g++ $(CXXFLAGS) $(REL_PATH)/src/dram_system.cc dram_system_wrap.cxx $(SRCS)
+memory_system_wrap.o: memory_system_wrap.cxx
+	g++ $(CXXFLAGS) $(REL_PATH)/src/memory_system.cc memory_system_wrap.cxx $(SRCS)
 
-dram_system_wrap.cxx:
-	swig -python -c++ dram_system.i
+memory_system_wrap.cxx:
+	swig -python -c++ memory_system.i
 
 clean:
-	rm -f $(RUNT) dram_system_wrap.cxx dram_system_wrap.c dram_system.py dram_system.o _dram_system.so dram_system_wrap.o
+	rm -f $(RUNT) memory_system_wrap.cxx memory_system_wrap.c memory_system.py memory_system.o _memory_system.so memory_system_wrap.o
 
 
